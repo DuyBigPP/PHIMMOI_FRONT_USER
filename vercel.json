@@ -1,6 +1,13 @@
 {
-    "rewrites": [
-      { "source": "/(.*)", "destination": "/" }
-    ]
-  }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "routes": [
+    { "src": "/", "status": 308, "headers": { "Location": "/home-page" } },
+    { "src": "/dashboard", "dest": "/home-page" },
+    { "src": "/dashboard/(.*)", "dest": "/home-page" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
   

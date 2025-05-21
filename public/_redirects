@@ -1,0 +1,4 @@
+# Netlify SPA routing
+/ /home-page 302
+/dashboard/* /home-page 302
+/* /index.html 200 

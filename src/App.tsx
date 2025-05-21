@@ -1,10 +1,19 @@
-import { AdminRoutes } from "@/routes/adminRoutes"
+import { AppRoutes } from "@/routes/routes"
 import { ThemeProvider } from "@/components/ui/theme-provider"
+import { useEffect } from "react"
 
 function App() {
+  // Force dark theme on load
+  useEffect(() => {
+    document.documentElement.classList.remove('light');
+    document.documentElement.classList.add('dark');
+  }, []);
+
   return (
-    <ThemeProvider defaultTheme="system" storageKey="app-theme">
-      <AdminRoutes />
+    <ThemeProvider defaultTheme="dark" storageKey="rophim-theme">
+      <div className="min-h-screen bg-background">
+        <AppRoutes />
+      </div>
     </ThemeProvider>
   )
 }

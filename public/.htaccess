@@ -1,0 +1,17 @@
+# Redirect all requests to index.html for SPA routing
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # Redirect root to home-page
+  RewriteRule ^$ /home-page [L,R=302]
+  
+  # Redirect dashboard to home-page
+  RewriteRule ^dashboard(/.*)?$ /home-page [L,R=302]
+  
+  # Handle other SPA routes
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule> 
