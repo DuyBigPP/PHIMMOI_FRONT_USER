@@ -34,6 +34,86 @@ export interface Movie {
   backdrop?: string;
 }
 
+export interface MovieDetail {
+  id: string;
+  name: string;
+  slug: string;
+  originName: string;
+  content: string;
+  type: string;
+  status: string;
+  posterUrl: string;
+  thumbUrl: string;
+  isCopyright: boolean;
+  subDocquyen: boolean;
+  chieurap: boolean;
+  trailerUrl?: string;
+  time: string;
+  episodeCurrent: string;
+  episodeTotal: string;
+  quality?: string;
+  lang: string;
+  notify: string;
+  showtimes: string;
+  year: number;
+  view: number;
+  tmdbId: string;
+  tmdbType: string;
+  tmdbVoteAverage: number;
+  tmdbVoteCount: number;
+  imdbId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  categories: Array<{
+    movieId: string;
+    categorySlug: string;
+    category: {
+      id: string;
+      name: string;
+      slug: string;
+    }
+  }>;
+  countries: Array<{
+    movieId: string;
+    countrySlug: string;
+    country: {
+      id: string;
+      name: string;
+      slug: string;
+    }
+  }>;
+  actors: Array<{
+    movieId: string;
+    actorName: string;
+    actor: {
+      id: string;
+      name: string;
+    }
+  }>;
+  directors: Array<{
+    movieId: string;
+    directorName: string;
+    director: {
+      id: string;
+      name: string;
+    }
+  }>;
+  episodes: Array<MovieEpisode>;
+}
+
+export interface MovieEpisode {
+  id: string;
+  name: string;
+  slug: string;
+  filename: string;
+  linkEmbed: string;
+  linkM3u8: string;
+  movieId: string;
+  serverName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TVShow extends Movie {
   type: 'tv';
   seasons: Season[];

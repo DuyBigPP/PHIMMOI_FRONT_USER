@@ -1,84 +1,85 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Section } from "@/components/ui/section";
-// import { MovieCard } from "@/components/ui/movie-card"; // No longer used
 import { MovieCarousel } from "@/components/ui/movie-carousel";
 import { FeaturedCarousel } from "@/components/ui/featured-carousel";
 import { getPopularMovies, getMovieList } from "@/service/function";
 import type { Movie } from "@/types/movie";
 import LoadingAnimation from "@/components/common/loading_animation";
+import { MovieSection } from "@/components/sections/MovieSection";
 
 export default function HomePage() {
-  // const [featuredMedia, setFeaturedMedia] = useState<Movie[]>([]); // No longer used
   const [featuredCarouselMovies, setFeaturedCarouselMovies] = useState<Movie[]>([]);
   const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
   const [popularTVShows, setPopularTVShows] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const dataFetchedRef = useRef(false);
 
   useEffect(() => {
+    // Tránh fetch dữ liệu nhiều lần trong development mode với React.StrictMode
+    if (dataFetchedRef.current) return;
+    
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        console.log('Fetching popular movies...');
+        // Fetch popular movies
         const popularResponse = await getPopularMovies();
-        console.log('Popular movies response:', popularResponse);
 
         if (!popularResponse.success) {
           throw new Error(popularResponse.message || 'Failed to fetch popular movies');
         }
 
-        if (!Array.isArray(popularResponse.data)) {
-          console.error('Popular movies data is not an array:', popularResponse.data);
-          throw new Error('Invalid data format from popular movies API');
+        // API có thể trả về dữ liệu theo nhiều cách khác nhau
+        let popularMovies: Movie[] = [];
+        if (Array.isArray(popularResponse.data)) {
+          popularMovies = popularResponse.data;
+        } else if (popularResponse.data?.movies && Array.isArray(popularResponse.data.movies)) {
+          popularMovies = popularResponse.data.movies;
+        } else {
+          console.warn('Unexpected popular movies data structure:', popularResponse.data);
+          popularMovies = [];
         }
 
-        if (popularResponse.data.length > 0) {
-          console.log('First movie structure:', popularResponse.data[0]);
-        }
+        setFeaturedCarouselMovies(popularMovies.slice(0, 5));
 
-        console.log('Setting featured media...');
-        // setFeaturedMedia(popularResponse.data[0]);
-        setFeaturedCarouselMovies(popularResponse.data);
-
-        console.log('Fetching trending movies...');
+        // Fetch trending movies
         const trendingResponse = await getMovieList({ type: 'single', sort: 'popular' });
-        console.log('Trending movies response:', trendingResponse);
 
         if (!trendingResponse.success) {
           throw new Error(trendingResponse.message || 'Failed to fetch trending movies');
         }
 
-        if (!trendingResponse.data?.movies) {
-          console.error('Trending movies data is missing movies array:', trendingResponse.data);
-          throw new Error('Invalid data format from trending movies API');
+        // Kiểm tra cấu trúc dữ liệu trả về
+        let trendingMoviesData: Movie[] = [];
+        if (trendingResponse.data?.movies && Array.isArray(trendingResponse.data.movies)) {
+          trendingMoviesData = trendingResponse.data.movies;
+        } else {
+          console.warn('Unexpected trending movies data structure:', trendingResponse.data);
+          trendingMoviesData = [];
         }
 
-        if (trendingResponse.data.movies.length > 0) {
-          console.log('First trending movie structure:', trendingResponse.data.movies[0]);
-        }
+        setTrendingMovies(trendingMoviesData);
 
-        setTrendingMovies(trendingResponse.data.movies);
-
-        console.log('Fetching TV shows...');
+        // Fetch TV shows
         const tvResponse = await getMovieList({ type: 'series', sort: 'popular' });
-        console.log('TV shows response:', tvResponse);
 
         if (!tvResponse.success) {
           throw new Error(tvResponse.message || 'Failed to fetch TV shows');
         }
 
-        if (!tvResponse.data?.movies) {
-          console.error('TV shows data is missing movies array:', tvResponse.data);
-          throw new Error('Invalid data format from TV shows API');
+        // Kiểm tra cấu trúc dữ liệu trả về
+        let tvShowsData: Movie[] = [];
+        if (tvResponse.data?.movies && Array.isArray(tvResponse.data.movies)) {
+          tvShowsData = tvResponse.data.movies;
+        } else {
+          console.warn('Unexpected TV shows data structure:', tvResponse.data);
+          tvShowsData = [];
         }
 
-        if (tvResponse.data.movies.length > 0) {
-          console.log('First TV show structure:', tvResponse.data.movies[0]);
-        }
-
-        setPopularTVShows(tvResponse.data.movies);
+        setPopularTVShows(tvShowsData);
+        dataFetchedRef.current = true;
       } catch (err) {
         console.error('Error fetching data:', err);
         setError(err instanceof Error ? err.message : 'Failed to load movie data');
@@ -121,32 +122,51 @@ export default function HomePage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Featured Carousel chỉ 1 phim */}
+    <div className="space-y-6 md:space-y-8">
+      {/* Featured Carousel */}
       <div className="-mx-4">
-        <FeaturedCarousel movies={featuredCarouselMovies.slice(0, 5)} />
+        <FeaturedCarousel movies={featuredCarouselMovies} />
       </div>
 
-      {/* Featured Movies Carousel (nếu cần) */}
-      {/* {featuredMedia.length > 0 && (
-        <Section title="Phim Đề Xuất" href="/danh-sach">
-          <MovieCarousel movies={featuredMedia} className="w-full" />
-        </Section>
-      )} */}
+      {/* Trending Movies - Desktop */}
+      <div className="hidden md:block">
+        {trendingMovies.length > 0 && (
+          <Section title="Phim Lẻ" href="/phim-le">
+            <MovieCarousel movies={trendingMovies} className="w-full" />
+          </Section>
+        )}
+      </div>
 
-      {/* Trending Movies */}
-      {trendingMovies.length > 0 && (
-        <Section title="Phim Lẻ" href="/phim-le">
-          <MovieCarousel movies={trendingMovies} className="w-full" />
-        </Section>
-      )}
+      {/* Trending Movies - Mobile */}
+      <div className="md:hidden">
+        {trendingMovies.length > 0 && (
+          <MovieSection 
+            title="Phim Lẻ" 
+            viewAllHref="/phim-le" 
+            movies={trendingMovies.slice(0, 6)} 
+          />
+        )}
+      </div>
 
-      {/* Popular TV Shows */}
-      {popularTVShows.length > 0 && (
-        <Section title="Phim Bộ" href="/phim-bo">
-          <MovieCarousel movies={popularTVShows} className="w-full" />
-        </Section>
-      )}
+      {/* Popular TV Shows - Desktop */}
+      <div className="hidden md:block">
+        {popularTVShows.length > 0 && (
+          <Section title="Phim Bộ" href="/phim-bo">
+            <MovieCarousel movies={popularTVShows} className="w-full" />
+          </Section>
+        )}
+      </div>
+
+      {/* Popular TV Shows - Mobile */}
+      <div className="md:hidden">
+        {popularTVShows.length > 0 && (
+          <MovieSection 
+            title="Phim Bộ" 
+            viewAllHref="/phim-bo" 
+            movies={popularTVShows.slice(0, 6)} 
+          />
+        )}
+      </div>
     </div>
   );
-} 
+}

@@ -9,7 +9,6 @@ const LoadingAnimation: React.FC = () => (
     loop
     src={loading}
     style={{ height: '200px', width: '200px' }}
-    className='mt-40'
   />
   
   <p className="text-muted-foreground text-center">Đang tải phim...Server đồ chùa load nhanh hết cỡ rồi:))</p>

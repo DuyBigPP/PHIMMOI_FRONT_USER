@@ -13,6 +13,8 @@ interface MovieCardProps {
 }
 
 export function MovieCard({ movie, className, priority = false }: MovieCardProps) {
+  const hasRating = typeof movie.rating === 'number' && movie.rating > 0;
+
   return (
     <Card className={cn("group overflow-hidden rounded-lg border-0 shadow-md transition-all hover:shadow-xl", className)}>
       <CardContent className="p-0">
@@ -29,31 +31,33 @@ export function MovieCard({ movie, className, priority = false }: MovieCardProps
             
             {/* Hover Play Button */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform opacity-0 transition-opacity group-hover:opacity-100">
-              <Button size="icon" variant="secondary" className="h-12 w-12 rounded-full bg-primary/90 text-primary-foreground">
-                <Play className="h-6 w-6" />
+              <Button size="icon" variant="secondary" className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/90 text-primary-foreground">
+                <Play className="h-5 w-5 sm:h-6 sm:w-6" />
               </Button>
             </div>
           </Link>
           
           {/* Movie Quality */}
           {movie.quality && (
-            <Badge className="absolute left-2 top-2 bg-primary">{movie.quality}</Badge>
+            <Badge className="absolute left-2 top-2 bg-primary text-xs">{movie.quality}</Badge>
           )}
           
           {/* Movie Rating */}
-          <div className="absolute right-2 top-2 flex items-center rounded-md bg-black/70 px-1.5 py-0.5 text-xs text-yellow-400">
-            <Star className="mr-0.5 h-3 w-3 fill-current" />
-            <span>{(movie.rating || 0).toFixed(1)}</span>
-          </div>
+          {hasRating && (
+            <div className="absolute right-2 top-2 flex items-center rounded-md bg-black/60 px-1.5 py-0.5">
+              <Star className="mr-0.5 h-3 w-3 text-yellow-400" />
+              <span className="text-xs font-medium text-white">{movie.rating!.toFixed(1)}</span>
+            </div>
+          )}
         </div>
         
         {/* Movie Info */}
-        <div className="p-3">
-          <h3 className="line-clamp-1 font-medium">{movie.name || 'Không có tiêu đề'}</h3>
+        <div className="p-2 sm:p-3">
+          <h3 className="line-clamp-1 text-sm sm:text-base font-medium">{movie.name || 'Không có tiêu đề'}</h3>
           {movie.originName && movie.originName !== movie.name && (
-            <p className="line-clamp-1 text-sm text-muted-foreground">{movie.originName}</p>
+            <p className="line-clamp-1 text-xs sm:text-sm text-muted-foreground">{movie.originName}</p>
           )}
-          <div className="mt-1 flex items-center text-sm text-muted-foreground">
+          <div className="mt-1 flex items-center text-xs sm:text-sm text-muted-foreground">
             <span>{movie.year || 'N/A'}</span>
             <span className="mx-1">•</span>
             <span>{movie.time || (movie.duration ? `${movie.duration} phút` : 'N/A')}</span>

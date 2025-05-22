@@ -8,7 +8,7 @@ import WatchPage from "@/pages/watch/WatchPage";
 import SearchPage from "@/pages/search/SearchPage";
 import GenrePage from "@/pages/genre/GenrePage";
 import CountryPage from "@/pages/country/CountryPage";
-import ActorPage from "@/pages/actor/ActorPage";
+
 import NotFoundPage from "@/pages/error/NotFoundPage";
 
 export function AppRoutes() {
@@ -22,11 +22,10 @@ export function AppRoutes() {
           <Route path="phim-bo" element={<TVShowsPage />} />
           <Route path="the-loai/:genreId" element={<GenrePage />} />
           <Route path="quoc-gia/:countryId" element={<CountryPage />} />
-          <Route path="dien-vien/:actorId" element={<ActorPage />} />
           <Route path="tim-kiem" element={<SearchPage />} />
-          <Route path="phim/:id" element={<DetailPage />} />
-          <Route path="xem-phim/:id" element={<WatchPage />} />
-          <Route path="xem-phim/:id/season/:seasonId/episode/:episodeId" element={<WatchPage />} />
+          <Route path="phim/:slug" element={<DetailPage />} />
+          <Route path="xem-phim/:slug" element={<WatchPage />} />
+          <Route path="xem-phim/:slug/:episodeSlug" element={<WatchPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
