@@ -14,6 +14,53 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
+// Genre categories with slugs
+const genres = [
+  { name: "Hành Động", slug: "hanh-dong" },
+  { name: "Tình Cảm", slug: "tinh-cam" },
+  { name: "Hài Hước", slug: "hai-huoc" },
+  { name: "Kinh Dị", slug: "kinh-di" },
+  { name: "Cổ Trang", slug: "co-trang" },
+  { name: "Viễn Tưởng", slug: "vien-tuong" },
+  { name: "Tâm Lý", slug: "tam-ly" },
+  { name: "Hoạt Hình", slug: "hoat-hinh" },
+  { name: "Võ Thuật", slug: "vo-thuat" },
+  { name: "Phiêu Lưu", slug: "phieu-luu" },
+  { name: "Hình Sự", slug: "hinh-su" },
+  { name: "Chiến Tranh", slug: "chien-tranh" },
+  { name: "Tài Liệu", slug: "tai-lieu" },
+  { name: "Thần Thoại", slug: "than-thoai" },
+  { name: "Bí Ẩn", slug: "bi-an" },
+  { name: "Phim 18+", slug: "phim-18" },
+  { name: "Học Đường", slug: "hoc-duong" },
+  { name: "Chương Trình Truyền Hình", slug: "chuong-trinh-truyen-hinh" },
+  { name: "Gia Đình", slug: "gia-dinh" },
+  { name: "Gay Cấn", slug: "gay-can" },
+  { name: "Âm Nhạc", slug: "am-nhac" },
+  { name: "Giả Tưởng", slug: "gia-tuong" },
+  { name: "Lịch Sử", slug: "lich-su" },
+  { name: "Trẻ Em", slug: "tre-em" },
+  { name: "Miền Tây", slug: "mien-tay" },
+  { name: "Kinh Điển", slug: "kinh-dien" },
+  { name: "Thể Thao", slug: "the-thao" },
+  { name: "Chính Kịch", slug: "chinh-kich" },
+  { name: "Khoa Học", slug: "khoa-hoc" }
+];
+
+// Country list with slugs
+const countries = [
+  { name: "Việt Nam", slug: "viet-nam" },
+  { name: "Hàn Quốc", slug: "han-quoc" },
+  { name: "Trung Quốc", slug: "trung-quoc" },
+  { name: "Thái Lan", slug: "thai-lan" },
+  { name: "Nhật Bản", slug: "nhat-ban" },
+  { name: "Âu Mỹ", slug: "au-my" },
+  { name: "Ấn Độ", slug: "an-do" },
+  { name: "Philippines", slug: "philippines" },
+  { name: "Đài Loan", slug: "dai-loan" },
+  { name: "Hồng Kông", slug: "hong-kong" },
+];
+
 export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -81,13 +128,16 @@ export function Header() {
                       "bg-transparent text-white hover:bg-white/10 data-[state=open]:bg-white/20"
                     )}>Thể Loại</NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <div className="grid w-[400px] grid-cols-2 gap-3 p-4">
-                        <Link to="/the-loai/hanh-dong" className="block p-2 hover:bg-accent rounded-md">Hành Động</Link>
-                        <Link to="/the-loai/tinh-cam" className="block p-2 hover:bg-accent rounded-md">Tình Cảm</Link>
-                        <Link to="/the-loai/kinh-di" className="block p-2 hover:bg-accent rounded-md">Kinh Dị</Link>
-                        <Link to="/the-loai/hai-huoc" className="block p-2 hover:bg-accent rounded-md">Hài Hước</Link>
-                        <Link to="/the-loai/co-trang" className="block p-2 hover:bg-accent rounded-md">Cổ Trang</Link>
-                        <Link to="/the-loai/vien-tuong" className="block p-2 hover:bg-accent rounded-md">Viễn Tưởng</Link>
+                      <div className="grid w-[600px] grid-cols-3 gap-3 p-4">
+                        {genres.map(genre => (
+                          <Link 
+                            key={genre.slug}
+                            to={`/the-loai/${genre.slug}`} 
+                            className="block p-2 hover:bg-accent rounded-md"
+                          >
+                            {genre.name}
+                          </Link>
+                        ))}
                       </div>
                     </NavigationMenuContent>
                   </NavigationMenuItem>
@@ -96,13 +146,16 @@ export function Header() {
                       "bg-transparent text-white hover:bg-white/10 data-[state=open]:bg-white/20"
                     )}>Quốc Gia</NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <div className="grid w-[400px] grid-cols-2 gap-3 p-4">
-                        <Link to="/quoc-gia/viet-nam" className="block p-2 hover:bg-accent rounded-md">Việt Nam</Link>
-                        <Link to="/quoc-gia/han-quoc" className="block p-2 hover:bg-accent rounded-md">Hàn Quốc</Link>
-                        <Link to="/quoc-gia/trung-quoc" className="block p-2 hover:bg-accent rounded-md">Trung Quốc</Link>
-                        <Link to="/quoc-gia/thai-lan" className="block p-2 hover:bg-accent rounded-md">Thái Lan</Link>
-                        <Link to="/quoc-gia/nhat-ban" className="block p-2 hover:bg-accent rounded-md">Nhật Bản</Link>
-                        <Link to="/quoc-gia/au-my" className="block p-2 hover:bg-accent rounded-md">Âu Mỹ</Link>
+                      <div className="grid w-[500px] grid-cols-2 gap-3 p-4">
+                        {countries.map(country => (
+                          <Link 
+                            key={country.slug}
+                            to={`/quoc-gia/${country.slug}`} 
+                            className="block p-2 hover:bg-accent rounded-md"
+                          >
+                            {country.name}
+                          </Link>
+                        ))}
                       </div>
                     </NavigationMenuContent>
                   </NavigationMenuItem>
@@ -176,19 +229,31 @@ export function Header() {
                 <div className="px-2 py-2">
                   <h3 className="font-medium mb-2">Thể Loại</h3>
                   <div className="grid grid-cols-2 gap-2 pl-2">
-                    <Link to="/the-loai/hanh-dong" className="py-1 hover:text-primary" onClick={() => setMobileMenuOpen(false)}>Hành Động</Link>
-                    <Link to="/the-loai/tinh-cam" className="py-1 hover:text-primary" onClick={() => setMobileMenuOpen(false)}>Tình Cảm</Link>
-                    <Link to="/the-loai/kinh-di" className="py-1 hover:text-primary" onClick={() => setMobileMenuOpen(false)}>Kinh Dị</Link>
-                    <Link to="/the-loai/hai-huoc" className="py-1 hover:text-primary" onClick={() => setMobileMenuOpen(false)}>Hài Hước</Link>
+                    {genres.slice(0, 8).map(genre => (
+                      <Link 
+                        key={genre.slug}
+                        to={`/the-loai/${genre.slug}`} 
+                        className="py-1 hover:text-primary" 
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {genre.name}
+                      </Link>
+                    ))}
                   </div>
                 </div>
                 <div className="px-2 py-2">
                   <h3 className="font-medium mb-2">Quốc Gia</h3>
                   <div className="grid grid-cols-2 gap-2 pl-2">
-                    <Link to="/quoc-gia/viet-nam" className="py-1 hover:text-primary" onClick={() => setMobileMenuOpen(false)}>Việt Nam</Link>
-                    <Link to="/quoc-gia/han-quoc" className="py-1 hover:text-primary" onClick={() => setMobileMenuOpen(false)}>Hàn Quốc</Link>
-                    <Link to="/quoc-gia/trung-quoc" className="py-1 hover:text-primary" onClick={() => setMobileMenuOpen(false)}>Trung Quốc</Link>
-                    <Link to="/quoc-gia/au-my" className="py-1 hover:text-primary" onClick={() => setMobileMenuOpen(false)}>Âu Mỹ</Link>
+                    {countries.slice(0, 6).map(country => (
+                      <Link 
+                        key={country.slug}
+                        to={`/quoc-gia/${country.slug}`} 
+                        className="py-1 hover:text-primary" 
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {country.name}
+                      </Link>
+                    ))}
                   </div>
                 </div>
               </nav>
