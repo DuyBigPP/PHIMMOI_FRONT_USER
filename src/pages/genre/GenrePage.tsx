@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import LoadingAnimation from "@/components/common/loading_animation";
 
 // Genre categories with slugs
 const genres = [
@@ -262,7 +263,7 @@ export default function GenrePage() {
       {/* Loading state */}
       {loading && (
         <div className="flex h-40 items-center justify-center">
-          <p className="text-muted-foreground">Đang tải phim...</p>
+          <LoadingAnimation />
         </div>
       )}
       

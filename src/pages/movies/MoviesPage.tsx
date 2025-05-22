@@ -14,6 +14,7 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { getMovieList } from "@/service/function";
 import { MovieListParams } from "@/types/api";
 import { Input } from "@/components/ui/input";
+import LoadingAnimation from "@/components/common/loading_animation";
 
 export default function MoviesPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -214,7 +215,7 @@ export default function MoviesPage() {
       {/* Loading state */}
       {loading && (
         <div className="flex h-40 items-center justify-center">
-          <p className="text-muted-foreground">Đang tải phim...</p>
+          <LoadingAnimation />
         </div>
       )}
       

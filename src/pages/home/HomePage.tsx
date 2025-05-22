@@ -5,6 +5,7 @@ import { MovieCarousel } from "@/components/ui/movie-carousel";
 import { FeaturedCarousel } from "@/components/ui/featured-carousel";
 import { getPopularMovies, getMovieList } from "@/service/function";
 import type { Movie } from "@/types/movie";
+import LoadingAnimation from "@/components/common/loading_animation";
 
 export default function HomePage() {
   // const [featuredMedia, setFeaturedMedia] = useState<Movie[]>([]); // No longer used
@@ -90,7 +91,11 @@ export default function HomePage() {
   }, []);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64">Đang tải...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingAnimation />
+      </div>
+    );
   }
 
   if (error) {
