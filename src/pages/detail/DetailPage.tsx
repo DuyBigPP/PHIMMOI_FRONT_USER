@@ -99,21 +99,6 @@ export default function DetailPage() {
 
   const isTVShow = movie.type === 'series';
   const hasRating = movie.tmdbVoteAverage && movie.tmdbVoteAverage > 0;
-  
-  // Xác định link xem phim
-  const getWatchUrl = () => {
-    if (!movie.episodes || movie.episodes.length === 0) return null;
-    
-    const firstEpisode = movie.episodes[0];
-    if (firstEpisode.linkEmbed) {
-      return firstEpisode.linkEmbed;
-    } else if (firstEpisode.linkM3u8) {
-      return `https://player.phimapi.com/player/?url=${firstEpisode.linkM3u8}`;
-    }
-    return null;
-  };
-  
-  const watchUrl = getWatchUrl();
 
   return (
     <div className="space-y-6">
@@ -150,25 +135,15 @@ export default function DetailPage() {
           </div>
           
           <div className="mt-4 space-y-3">
-            {watchUrl ? (
-              <Button 
-                className="w-full" 
-                onClick={() => window.open(watchUrl, '_blank')}
-              >
+            <Button 
+              className="w-full" 
+              asChild
+            >
+              <Link to={`/xem-phim/${movie.slug}`}>
                 <Play className="mr-2 h-4 w-4" />
                 Xem Phim
-              </Button>
-            ) : (
-              <Button 
-                className="w-full" 
-                asChild
-              >
-                <Link to={`/xem-phim/${movie.slug}`}>
-                  <Play className="mr-2 h-4 w-4" />
-                  Xem Phim
-                </Link>
-              </Button>
-            )}
+              </Link>
+            </Button>
             {movie.trailerUrl && (
               <Button variant="outline" className="w-full" onClick={() => window.open(movie.trailerUrl, '_blank')}>
                 Xem Trailer
@@ -278,28 +253,15 @@ export default function DetailPage() {
               <div>
                 <h2 className="mb-3 text-xl font-semibold">Danh sách tập</h2>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                  {movie.episodes.map((episode) => {
-                    const episodeUrl = episode.linkEmbed || 
-                                      (episode.linkM3u8 ? `https://player.phimapi.com/player/?url=${episode.linkM3u8}` : null);
-                    
-                    return (
-                      <a 
-                        key={episode.id}
-                        href={episodeUrl || `#`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => {
-                          if (!episodeUrl) {
-                            e.preventDefault();
-                            alert('Không có nguồn phát cho tập phim này');
-                          }
-                        }}
-                        className="flex flex-col items-center rounded-md border p-1 transition-colors hover:bg-accent"
-                      >
-                        <span className="text-sm font-medium">{episode.name}</span>
-                      </a>
-                    );
-                  })}
+                  {movie.episodes.map((episode) => (
+                    <Link 
+                      key={episode.id}
+                      to={`/xem-phim/${movie.slug}/${episode.slug}`}
+                      className="flex flex-col items-center rounded-md border p-1 transition-colors hover:bg-accent"
+                    >
+                      <span className="text-sm font-medium">{episode.name}</span>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </>

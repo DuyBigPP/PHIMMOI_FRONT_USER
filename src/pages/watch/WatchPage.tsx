@@ -1,51 +1,170 @@
-import { useState, useEffect, memo, useMemo, useCallback } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef, memo, useMemo } from "react";
+import { useParams, Link } from "react-router-dom";
 import { getMovieBySlug } from "@/service/function";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Download, Info, Share2, ThumbsUp, ExternalLink } from "lucide-react";
+import { ArrowLeft, Download, Info, Share2, ThumbsUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import LoadingAnimation from "@/components/common/loading_animation";
 import { MovieDetail, MovieEpisode } from "@/types/movie";
+import Hls from "hls.js";
+
+// Native HLS Video Player using hls.js
+const StableVideoPlayer = memo(({ episode }: { episode: MovieEpisode }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Extract video source from episode
+  const videoSrc = useMemo(() => {
+    if (episode.linkM3u8) {
+      return episode.linkM3u8;
+    } else if (episode.linkEmbed) {
+      // If only embed is available, we can't use it with hls.js
+      setError("Không hỗ trợ định dạng video này");
+      return null;
+    }
+    return null;
+  }, [episode]);
+
+  useEffect(() => {
+    // Clean up previous instance when component unmounts or video source changes
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, [episode.id]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoSrc) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    const loadVideo = async () => {
+      try {
+        // Check if HLS is supported by native browser
+        if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          // Native HLS support (Safari)
+          video.src = videoSrc;
+          video.addEventListener('loadedmetadata', () => {
+            setIsLoading(false);
+          });
+        } else if (Hls.isSupported()) {
+          // Use HLS.js for browsers without native HLS support
+          const hls = new Hls({
+            enableWorker: true,
+            lowLatencyMode: true,
+            backBufferLength: 90
+          });
+          
+          hlsRef.current = hls;
+          
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+            hls.loadSource(videoSrc);
+          });
+          
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            setIsLoading(false);
+            video.play().catch(error => {
+              console.warn('Autoplay prevented:', error);
+            });
+          });
+          
+          hls.on(Hls.Events.ERROR, (_, data) => {
+            if (data.fatal) {
+              switch (data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                  // Try to recover network error
+                  console.log('Fatal network error', data);
+                  hls.startLoad();
+                  break;
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                  // Try to recover media error
+                  console.log('Fatal media error', data);
+                  hls.recoverMediaError();
+                  break;
+                default:
+                  // Cannot recover
+                  setError('Không thể phát video');
+                  hls.destroy();
+                  break;
+              }
+            }
+          });
+        } else {
+          setError('Trình duyệt không hỗ trợ phát video HLS');
+        }
+      } catch (err) {
+        console.error('Video player error:', err);
+        setError('Có lỗi khi phát video');
+        setIsLoading(false);
+      }
+    };
+
+    loadVideo();
+  }, [videoSrc, episode.id]);
+
+  if (!videoSrc || error) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-black">
+        <div className="text-center">
+          <p className="text-xl font-medium text-white">
+            {error || "Không có nguồn phát"}
+          </p>
+          <p className="mt-2 text-sm text-white/70">
+            {error 
+              ? "Vui lòng thử lại sau hoặc chọn nguồn phát khác" 
+              : "Không thể tải nguồn phát cho phim này"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="relative w-full h-full">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
+          <div className="w-12 h-12 border-4 border-t-primary rounded-full animate-spin" />
+        </div>
+      )}
+      <video
+        ref={videoRef}
+        controls
+        autoPlay
+        playsInline
+        className="absolute inset-0 w-full h-full object-contain bg-black"
+      />
+    </div>
+  );
+});
+
+StableVideoPlayer.displayName = "StableVideoPlayer";
 
 // Component hiển thị danh sách tập phim
 const EpisodeList = memo(({ episodes, currentEpisodeId, movieSlug }: { 
   episodes: MovieEpisode[], 
   currentEpisodeId: string, 
-  movieSlug: string,
-  onEpisodeClick?: (episode: MovieEpisode) => void
+  movieSlug: string 
 }) => {
-  const navigate = useNavigate();
-  
-  const handleEpisodeClick = useCallback((episode: MovieEpisode, e: React.MouseEvent) => {
-    e.preventDefault();
-    
-    // Redirect to external player if available
-    if (episode.linkEmbed) {
-      window.open(episode.linkEmbed, '_blank');
-    } else if (episode.linkM3u8) {
-      window.open(`https://player.phimapi.com/player/?url=${episode.linkM3u8}`, '_blank');
-    } else {
-      // Fallback to internal route
-      navigate(`/xem-phim/${movieSlug}/${episode.slug}`);
-    }
-  }, [movieSlug, navigate]);
-
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
       {episodes.map((episode) => (
-        <a 
+        <Link 
           key={episode.id}
-          href={episode.linkEmbed || `https://player.phimapi.com/player/?url=${episode.linkM3u8}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => handleEpisodeClick(episode, e)}
+          to={`/xem-phim/${movieSlug}/${episode.slug}`}
           className={`flex flex-col items-center rounded-md border p-1 transition-colors hover:bg-accent ${
             currentEpisodeId === episode.id ? "bg-accent" : ""
           }`}
         >
           <span className="text-sm font-medium">{episode.name}</span>
-        </a>
+        </Link>
       ))}
     </div>
   );
@@ -55,7 +174,6 @@ EpisodeList.displayName = "EpisodeList";
 
 export default function WatchPage() {
   const { slug, episodeSlug } = useParams<{ slug: string; episodeSlug?: string }>();
- 
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [currentEpisode, setCurrentEpisode] = useState<MovieEpisode | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,15 +193,6 @@ export default function WatchPage() {
     
     return episodes[0];
   };
-
-  // Chuyển hướng người dùng đến trang xem phim
-  const redirectToPlayer = useCallback((episode: MovieEpisode) => {
-    if (episode.linkEmbed) {
-      window.open(episode.linkEmbed, '_blank');
-    } else if (episode.linkM3u8) {
-      window.open(`https://player.phimapi.com/player/?url=${episode.linkM3u8}`, '_blank');
-    }
-  }, []);
 
   // Chỉ fetch movie khi slug thay đổi
   useEffect(() => {
@@ -106,17 +215,6 @@ export default function WatchPage() {
         if (response.success && response.data) {
           const movieData = response.data as unknown as MovieDetail;
           setMovie(movieData);
-          
-          // Tìm episode phù hợp
-          const episode = findEpisode(movieData.episodes, stableEpisodeSlug);
-          if (episode) {
-            setCurrentEpisode(episode);
-            
-            // Nếu đang ở route xem phim (có episodeSlug), tự động redirect
-            if (stableEpisodeSlug) {
-              redirectToPlayer(episode);
-            }
-          }
         } else {
           setError(response.message || "Không thể tải dữ liệu phim");
         }
@@ -137,7 +235,17 @@ export default function WatchPage() {
     return () => {
       isCancelled = true; // Cleanup
     };
-  }, [stableSlug, stableEpisodeSlug, redirectToPlayer]);
+  }, [stableSlug]); // Chỉ depend vào stableSlug
+
+  // Set episode khi movie hoặc episodeSlug thay đổi
+  useEffect(() => {
+    if (!movie?.episodes) return;
+    
+    const episode = findEpisode(movie.episodes, stableEpisodeSlug);
+    if (episode) {
+      setCurrentEpisode(episode);
+    }
+  }, [movie, stableEpisodeSlug]); // Depend vào movie và stableEpisodeSlug
 
   if (loading) {
     return (
@@ -188,10 +296,6 @@ export default function WatchPage() {
 
   const isTVShow = movie.type === 'series';
   const episodeTitle = isTVShow ? `${movie.name} - ${currentEpisode.name}` : movie.name;
-  
-  // Determine player URL
-  const playerUrl = currentEpisode.linkEmbed || 
-                    (currentEpisode.linkM3u8 ? `https://player.phimapi.com/player/?url=${currentEpisode.linkM3u8}` : null);
 
   return (
     <div className="space-y-6">
@@ -205,23 +309,11 @@ export default function WatchPage() {
         </Button>
       </div>
       
-      {/* Video Player Preview */}
-      <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-6">{episodeTitle}</h2>
-          {playerUrl ? (
-            <Button 
-              size="lg" 
-              onClick={() => window.open(playerUrl, '_blank')}
-              className="bg-primary hover:bg-primary/90"
-            >
-              <ExternalLink className="mr-2 h-5 w-5" />
-              Xem Phim
-            </Button>
-          ) : (
-            <p className="text-white/70">Không có nguồn phát cho phim này</p>
-          )}
-        </div>
+      {/* Video Player */}
+      <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black">
+        {currentEpisode && (
+          <StableVideoPlayer episode={currentEpisode} />
+        )}
       </div>
 
       {/* Title and Actions */}
@@ -269,7 +361,7 @@ export default function WatchPage() {
           <EpisodeList 
             episodes={movie.episodes} 
             currentEpisodeId={currentEpisode.id} 
-            movieSlug={movie.slug}
+            movieSlug={movie.slug} 
           />
         </div>
       )}
