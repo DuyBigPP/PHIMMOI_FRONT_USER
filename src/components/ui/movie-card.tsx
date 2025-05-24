@@ -2,18 +2,42 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, Star } from "lucide-react";
+import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Movie } from "@/types/movie";
 
+// Extended movie type to handle both Movie and MovieDetail properties
+interface MovieCardData extends Movie {
+  tmdbVoteAverage?: number;
+  // Các thuộc tính bổ sung khác mà không sử dụng any
+  createdAt?: string;
+  updatedAt?: string;
+  isCopyright?: boolean;
+  subDocquyen?: boolean;
+  chieurap?: boolean;
+  episodeCurrent?: string;
+  episodeTotal?: string;
+  lang?: string;
+  notify?: string;
+  showtimes?: string;
+  view?: number;
+  tmdbId?: string;
+  tmdbType?: string;
+  tmdbVoteCount?: number;
+  imdbId?: string | null;
+}
+
 interface MovieCardProps {
-  movie: Movie;
+  movie: MovieCardData;
   className?: string;
   priority?: boolean;
 }
 
 export function MovieCard({ movie, className, priority = false }: MovieCardProps) {
-  const hasRating = typeof movie.rating === 'number' && movie.rating > 0;
+
+  
+  // Poster fallback
+  const posterUrl = movie.posterUrl || movie.poster || 'https://via.placeholder.com/300x450?text=No+Poster';
 
   return (
     <Card className={cn("group overflow-hidden rounded-lg border-0 shadow-md transition-all hover:shadow-xl", className)}>
@@ -22,10 +46,14 @@ export function MovieCard({ movie, className, priority = false }: MovieCardProps
           {/* Movie Poster */}
           <Link to={`/phim/${movie.slug}`} className="block relative aspect-[2/3] overflow-hidden">
             <img
-              src={movie.posterUrl || movie.poster}
+              src={posterUrl}
               alt={movie.name || 'Movie poster'}
               loading={priority ? "eager" : "lazy"}
               className="h-full w-full object-cover transition-all duration-300 group-hover:scale-105 bg-zinc-900"
+              onError={(e) => {
+                // Fallback if image fails to load
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x450?text=No+Image';
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
             
@@ -40,14 +68,6 @@ export function MovieCard({ movie, className, priority = false }: MovieCardProps
           {/* Movie Quality */}
           {movie.quality && (
             <Badge className="absolute left-2 top-2 bg-primary text-xs">{movie.quality}</Badge>
-          )}
-          
-          {/* Movie Rating */}
-          {hasRating && (
-            <div className="absolute right-2 top-2 flex items-center rounded-md bg-black/60 px-1.5 py-0.5">
-              <Star className="mr-0.5 h-3 w-3 text-yellow-400" />
-              <span className="text-xs font-medium text-white">{movie.rating!.toFixed(1)}</span>
-            </div>
           )}
         </div>
         

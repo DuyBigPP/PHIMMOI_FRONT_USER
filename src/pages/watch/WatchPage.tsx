@@ -3,11 +3,13 @@ import { useParams, Link } from "react-router-dom";
 import { getMovieBySlug } from "@/service/function";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Download, Info, Share2, ThumbsUp } from "lucide-react";
+import { ArrowLeft, Info} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import LoadingAnimation from "@/components/common/loading_animation";
 import { MovieDetail, MovieEpisode } from "@/types/movie";
 import Hls from "hls.js";
+import { FavoriteButton } from "@/components/ui/favorite-button";
+import { ShareButton } from "@/components/ui/share-button";
 
 // Native HLS Video Player using hls.js
 const StableVideoPlayer = memo(({ episode }: { episode: MovieEpisode }) => {
@@ -331,18 +333,8 @@ export default function WatchPage() {
         </div>
         
         <div className="mt-4 flex flex-wrap gap-2">
-          <Button size="sm" variant="ghost" className="h-8">
-            <ThumbsUp className="mr-1 h-4 w-4" />
-            Thích
-          </Button>
-          <Button size="sm" variant="ghost" className="h-8">
-            <Share2 className="mr-1 h-4 w-4" />
-            Chia sẻ
-          </Button>
-          <Button size="sm" variant="ghost" className="h-8">
-            <Download className="mr-1 h-4 w-4" />
-            Tải xuống
-          </Button>
+          <FavoriteButton movieId={movie.id} size="sm" variant="ghost" className="h-8" />
+          <ShareButton size="sm" variant="ghost" className="h-8" />
           <Button size="sm" variant="ghost" className="h-8" asChild>
             <Link to={`/phim/${movie.slug}`}>
               <Info className="mr-1 h-4 w-4" />

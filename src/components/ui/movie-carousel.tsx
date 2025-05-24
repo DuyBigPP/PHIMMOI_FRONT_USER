@@ -3,7 +3,7 @@ import { MovieCard } from "@/components/ui/movie-card";
 import type { Movie } from "@/types/movie";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 
 interface MovieCarouselProps {
   movies: Movie[];
@@ -11,55 +11,98 @@ interface MovieCarouselProps {
 }
 
 function getSlidesToShow() {
-  if (typeof window !== 'undefined') {
-    if (window.innerWidth >= 1280) return 6; // xl
-    if (window.innerWidth >= 1024) return 4; // lg
-    if (window.innerWidth >= 768) return 3; // md
-    return 2; // sm
+  if (typeof window !== "undefined") {
+    if (window.innerWidth >= 1280) return 6;
+    if (window.innerWidth >= 1024) return 4;
+    if (window.innerWidth >= 768) return 3;
+    return 2;
   }
   return 6;
 }
 
 export function MovieCarousel({ movies, className }: MovieCarouselProps) {
-  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [itemWidth, setItemWidth] = React.useState(0);
   const [slidesToShow, setSlidesToShow] = React.useState(getSlidesToShow());
+  const [currentIndex, setCurrentIndex] = React.useState(slidesToShow); // bắt đầu sau clone đầu
   const [isPaused, setIsPaused] = React.useState(false);
-  const [direction, setDirection] = React.useState(1); // 1: next, -1: prev
+  const controls = useAnimation();
 
+  const gap = 16;
+
+  // Tính lại kích thước item
   React.useEffect(() => {
-    function handleResize() {
-      setSlidesToShow(getSlidesToShow());
-    }
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const update = () => {
+      if (containerRef.current) {
+        const total = containerRef.current.offsetWidth;
+        setItemWidth((total - gap * (slidesToShow - 1)) / slidesToShow);
+      }
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [slidesToShow]);
+
+  // Responsive
+  React.useEffect(() => {
+    const handleResize = () => setSlidesToShow(getSlidesToShow());
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Autoplay
+  // Clone dữ liệu đầu/cuối
+  const extendedMovies = [
+    ...movies.slice(-slidesToShow),
+    ...movies,
+    ...movies.slice(0, slidesToShow),
+  ];
+
+  const totalItems = extendedMovies.length;
+
+  // Auto play
   React.useEffect(() => {
-    if (!isPaused && movies.length > slidesToShow) {
+    if (!isPaused) {
       const interval = setInterval(() => {
-        setDirection(1);
-        setCurrentIndex((prev) => (prev + slidesToShow) % movies.length);
+        goTo(currentIndex + 1);
       }, 4000);
       return () => clearInterval(interval);
     }
-  }, [isPaused, movies.length, slidesToShow]);
+  }, [currentIndex, isPaused]);
 
-  const goToPrev = () => {
-    setDirection(-1);
-    setCurrentIndex((prev) => (prev - slidesToShow + movies.length) % movies.length);
+  // Animate chuyển slide
+  const goTo = async (index: number) => {
+    await controls.start({
+      x: -index * (itemWidth + gap),
+      transition: { duration: 0.5, ease: "easeInOut" },
+    });
+    setCurrentIndex(index);
   };
-  const goToNext = () => {
-    setDirection(1);
-    setCurrentIndex((prev) => (prev + slidesToShow) % movies.length);
-  };
 
-  // Get movies for current slide
-  const visibleMovies = movies.slice(currentIndex, currentIndex + slidesToShow).length === slidesToShow
-    ? movies.slice(currentIndex, currentIndex + slidesToShow)
-    : [...movies.slice(currentIndex), ...movies.slice(0, slidesToShow - (movies.length - currentIndex))];
+  // Sau khi animation tới clone → reset về thật
+  React.useEffect(() => {
+    if (currentIndex >= movies.length + slidesToShow) {
+      // cuối clone
+      const timeout = setTimeout(() => {
+        controls.set({
+          x: -slidesToShow * (itemWidth + gap),
+        });
+        setCurrentIndex(slidesToShow);
+      }, 510);
+      return () => clearTimeout(timeout);
+    } else if (currentIndex < slidesToShow) {
+      // đầu clone
+      const timeout = setTimeout(() => {
+        controls.set({
+          x: -(movies.length + slidesToShow - 1) * (itemWidth + gap),
+        });
+        setCurrentIndex(movies.length + slidesToShow - 1);
+      }, 510);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, controls, itemWidth]);
 
-  if (!movies || movies.length === 0) return null;
+  const prev = () => goTo(currentIndex - 1);
+  const next = () => goTo(currentIndex + 1);
 
   return (
     <div
@@ -67,47 +110,37 @@ export function MovieCarousel({ movies, className }: MovieCarouselProps) {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="w-full px-2 overflow-hidden">
-        <AnimatePresence initial={false} custom={direction} mode="wait">
-          <motion.div
-            key={currentIndex}
-            custom={direction}
-            initial={{ opacity: 0, x: direction > 0 ? 120 : -120 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: direction > 0 ? -120 : 120 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            className="flex gap-4"
-          >
-            {visibleMovies.map((movie) => (
-              <div key={movie.id} className="flex-1 min-w-0 transition-all">
-                <MovieCard movie={movie} />
-              </div>
-            ))}
-          </motion.div>
-        </AnimatePresence>
+      <div ref={containerRef} className="overflow-hidden px-2">
+        <motion.div
+          className="flex gap-4"
+          animate={controls}
+          style={{ width: totalItems * (itemWidth + gap) }}
+        >
+          {extendedMovies.map((movie, index) => (
+            <div
+              key={`${movie.id}-${index}`}
+              className="flex-none"
+              style={{ width: itemWidth }}
+            >
+              <MovieCard movie={movie} />
+            </div>
+          ))}
+        </motion.div>
       </div>
-      {movies.length > slidesToShow && (
-        <>
-          <button
-            className={cn(
-              "absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-16 md:w-12 md:h-20 bg-black/70 hover:bg-primary/80 transition-all rounded-r-md opacity-80 group-hover:opacity-100",
-            )}
-            onClick={goToPrev}
-            aria-label="Previous slide"
-          >
-            <ChevronLeft className="w-7 h-7 md:w-9 md:h-9 text-white mx-auto" />
-          </button>
-          <button
-            className={cn(
-              "absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-16 md:w-12 md:h-20 bg-black/70 hover:bg-primary/80 transition-all rounded-l-md opacity-80 group-hover:opacity-100",
-            )}
-            onClick={goToNext}
-            aria-label="Next slide"
-          >
-            <ChevronRight className="w-7 h-7 md:w-9 md:h-9 text-white mx-auto" />
-          </button>
-        </>
-      )}
+
+      <button
+        onClick={prev}
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-16 md:w-12 md:h-20 bg-black/70 hover:bg-primary/80 rounded-r-md text-white"
+      >
+        <ChevronLeft className="w-7 h-7 md:w-9 md:h-9 mx-auto" />
+      </button>
+
+      <button
+        onClick={next}
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-16 md:w-12 md:h-20 bg-black/70 hover:bg-primary/80 rounded-l-md text-white"
+      >
+        <ChevronRight className="w-7 h-7 md:w-9 md:h-9 mx-auto" />
+      </button>
     </div>
   );
-} 
+}

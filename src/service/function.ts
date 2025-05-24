@@ -119,19 +119,55 @@ export const createView = async (movieId: string): Promise<ApiResponse<void>> =>
 };
 
 // Auth API functions
-export const register = async (data: RegisterRequest): Promise<ApiResponse<AuthResponse>> => {
-  const response = await axios.post(REGISTER, data);
-  return response.data;
+export const register = async (data: RegisterRequest): Promise<AuthResponse | ApiResponse<AuthResponse>> => {
+  console.log('Calling register API with data:', data);
+  try {
+    const response = await axios.post(REGISTER, data);
+    console.log('Register API response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Register API error:', error);
+    // Check if the error has a response with data that might be useful
+    if (axios.isAxiosError(error) && error.response?.data) {
+      console.log('Register API error details:', error.response.data);
+    }
+    throw error;
+  }
 };
 
-export const login = async (data: LoginRequest): Promise<ApiResponse<AuthResponse>> => {
-  const response = await axios.post(LOGIN, data);
-  return response.data;
+export const login = async (data: LoginRequest): Promise<AuthResponse | ApiResponse<AuthResponse>> => {
+  console.log('Calling login API with data:', data);
+  try {
+    const response = await axios.post(LOGIN, data);
+    console.log('Login API response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Login API error:', error);
+    // Check if the error has a response with data that might be useful
+    if (axios.isAxiosError(error) && error.response?.data) {
+      console.log('Login API error details:', error.response.data);
+    }
+    throw error;
+  }
 };
 
-export const getUserInfo = async (): Promise<ApiResponse<User>> => {
-  const response = await axios.get(GET_USER_INFO);
-  return response.data;
+export const getUserInfo = async (): Promise<User | ApiResponse<User>> => {
+  console.log('Calling getUserInfo API');
+  try {
+    const response = await axios.get(GET_USER_INFO);
+    console.log('GetUserInfo API response:', response.data);
+    
+    // Kiểm tra nếu response.data có cấu trúc của một ApiResponse
+    if (response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
+      return response.data as ApiResponse<User>;
+    }
+    
+    // Nếu không, coi như response.data chính là User object
+    return response.data as User;
+  } catch (error) {
+    console.error('GetUserInfo API error:', error);
+    throw error;
+  }
 };
 
 // Favorite API functions

@@ -2,9 +2,10 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -13,6 +14,15 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // Genre categories with slugs
 const genres = [
@@ -62,10 +72,17 @@ const countries = [
 ];
 
 export function Header() {
+  console.log('Header component initialized');
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
+  
+  // Always call hooks at the top level
+  const auth = useAuth();
+  console.log('Auth accessed in Header:', auth ? 'loaded' : 'undefined');
+  const { user, logout } = auth || { user: null, logout: () => {} };
+  console.log('User in Header:', user ? 'exists' : 'null');
 
   // Handle scroll effect for header
   useEffect(() => {
@@ -84,6 +101,22 @@ export function Header() {
       navigate(`/tim-kiem?q=${encodeURIComponent(searchQuery)}`);
       setSearchQuery("");
     }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    navigate("/home-page");
+  };
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user || !user.name) return "U";
+    
+    const names = user.name.split(" ");
+    if (names.length === 1) return names[0].charAt(0).toUpperCase();
+    
+    return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
   };
 
   return (
@@ -186,6 +219,48 @@ export function Header() {
                   <Search className="h-4 w-4" />
                 </Button>
               </form>
+
+              {/* User Menu or Login/Register Button */}
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-full h-9 w-9 ml-2"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-primary text-primary-foreground">
+                          {getUserInitials()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Tài khoản</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/user-profile" className="cursor-pointer">
+                        Hồ sơ của tôi
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                      Đăng xuất
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="hidden md:flex"
+                  onClick={() => navigate("/dang-nhap")}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Đăng nhập
+                </Button>
+              )}
+
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -220,6 +295,60 @@ export function Header() {
                 </Button>
               </form>
               <nav className="flex flex-col space-y-2">
+                {/* Auth buttons for mobile */}
+                {user ? (
+                  <div className="flex flex-col space-y-2 mb-2">
+                    <Link 
+                      to="/user-profile" 
+                      className="flex items-center px-2 py-2 hover:bg-accent rounded-md"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Avatar className="h-6 w-6 mr-2">
+                        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                          {getUserInitials()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span>Hồ sơ của tôi</span>
+                    </Link>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="justify-start"
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Đăng xuất
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex space-x-2 mb-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => {
+                        navigate("/dang-nhap");
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Đăng nhập
+                    </Button>
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => {
+                        navigate("/dang-ky");
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Đăng ký
+                    </Button>
+                  </div>
+                )}
+
                 <Link to="/phim-le" className="px-2 py-2 hover:bg-accent rounded-md" onClick={() => setMobileMenuOpen(false)}>
                   Phim Lẻ
                 </Link>

@@ -1,4 +1,4 @@
-const BASE_URL = "https://phimmoi-backend.onrender.com";
+const BASE_URL = "https://phimmoibackend-production.up.railway.app";
 
 /* COMMENT */
 export const CREATE_COMMENT = `${BASE_URL}/api/movies/{movieId}/comments`; // POST
@@ -96,4 +96,4 @@ export const LOGIN = `${BASE_URL}/api/login`; // POST
     - email: string (body)
     - password: string (body)
 */
-export const GET_USER_INFO = `${BASE_URL}/api/users`; // GET
+export const GET_USER_INFO = `${BASE_URL}/api/me`; // GET

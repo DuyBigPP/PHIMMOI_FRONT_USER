@@ -1,6 +1,8 @@
 import { AppRoutes } from "@/routes/routes"
 import { ThemeProvider } from "@/components/ui/theme-provider"
+import { AuthProvider } from "@/context/AuthContext"
 import { useEffect } from "react"
+import { BrowserRouter } from "react-router-dom"
 
 function App() {
   // Force dark theme on load
@@ -10,11 +12,15 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="rophim-theme">
-      <div className="min-h-screen bg-background">
-        <AppRoutes />
-      </div>
-    </ThemeProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <ThemeProvider defaultTheme="dark" storageKey="rophim-theme">
+          <div className="min-h-screen bg-background">
+            <AppRoutes />
+          </div>
+        </ThemeProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 
