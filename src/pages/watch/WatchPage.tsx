@@ -10,6 +10,7 @@ import { MovieDetail, MovieEpisode } from "@/types/movie";
 import Hls from "hls.js";
 import { FavoriteButton } from "@/components/ui/favorite-button";
 import { ShareButton } from "@/components/ui/share-button";
+import CommentSection from "@/components/common/comment_section";
 
 // Native HLS Video Player using hls.js
 const StableVideoPlayer = memo(({ episode }: { episode: MovieEpisode }) => {
@@ -363,6 +364,9 @@ export default function WatchPage() {
         <h2 className="mb-3 text-xl font-semibold">Nội dung phim</h2>
         <p className="text-muted-foreground">{movie.content}</p>
       </div>
+      
+      {/* Comment and Rating Section */}
+      <CommentSection movieId={movie.id} className="mt-8" />
     </div>
   );
 }

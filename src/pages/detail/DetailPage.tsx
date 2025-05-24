@@ -11,6 +11,7 @@ import { MoviePoster } from "./component/MoviePoster";
 import { MovieInfo } from "./component/MovieInfo";
 import { EpisodeList } from "./component/EpisodeList";
 import { RelatedMovies } from "./component/RelatedMovies";
+import CommentSection from "@/components/common/comment_section";
 
 export default function DetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -145,9 +146,12 @@ export default function DetailPage() {
 
       {/* Episodes list for TV Shows */}
       <EpisodeList movie={movie} />
-
+      
+      {/* Comment Section */}
+      <CommentSection movieId={movie.id} className="mt-8" />
       {/* Related Movies */}
       <RelatedMovies movies={relatedMovies} />
+
     </div>
   );
 } 
