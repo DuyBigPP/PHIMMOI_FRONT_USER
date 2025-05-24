@@ -89,7 +89,7 @@ export function Header() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-
+    
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -128,39 +128,39 @@ export function Header() {
     >
       <div className="container mx-auto px-4">
         <div className="w-full px-4">
-          <div className="flex h-16 items-center justify-between">
-            {/* Logo */}
-            <Link to="/home-page" className="flex items-center space-x-2">
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
+          <Link to="/home-page" className="flex items-center space-x-2">
               <span className="text-2xl font-bold transition-colors text-white">PHIMSKIBIDI</span>
-            </Link>
+          </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
-              <NavigationMenu>
-                <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link to="/phim-le" className={cn(
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-4">
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <Link to="/phim-le" className={cn(
                         "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors bg-transparent hover:bg-white/10 focus:bg-white/20"
-                      )}>
-                        Phim Lẻ
-                      </Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link to="/phim-bo" className={cn(
+                    )}>
+                      Phim Lẻ
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <Link to="/phim-bo" className={cn(
                         "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors bg-transparent hover:bg-white/10 focus:bg-white/20"
-                      )}>
-                        Phim Bộ
-                      </Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className={cn(
+                    )}>
+                      Phim Bộ
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className={cn(
                       "bg-transparent text-white hover:bg-white/10 data-[state=open]:bg-white/20"
-                    )}>Thể Loại</NavigationMenuTrigger>
-                    <NavigationMenuContent>
+                  )}>Thể Loại</NavigationMenuTrigger>
+                  <NavigationMenuContent>
                       <div className="grid w-[600px] grid-cols-3 gap-3 p-4">
                         {genres.map(genre => (
                           <Link 
@@ -171,14 +171,14 @@ export function Header() {
                             {genre.name}
                           </Link>
                         ))}
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className={cn(
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className={cn(
                       "bg-transparent text-white hover:bg-white/10 data-[state=open]:bg-white/20"
-                    )}>Quốc Gia</NavigationMenuTrigger>
-                    <NavigationMenuContent>
+                  )}>Quốc Gia</NavigationMenuTrigger>
+                  <NavigationMenuContent>
                       <div className="grid w-[500px] grid-cols-2 gap-3 p-4">
                         {countries.map(country => (
                           <Link 
@@ -189,36 +189,36 @@ export function Header() {
                             {country.name}
                           </Link>
                         ))}
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
-            </div>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
 
-            {/* Search and Theme Toggle */}
-            <div className="flex items-center space-x-2">
-              <form onSubmit={handleSearch} className="relative hidden md:block">
-                <Input
-                  type="search"
-                  placeholder="Tìm kiếm phim..."
-                  className={cn(
+          {/* Search and Theme Toggle */}
+          <div className="flex items-center space-x-2">
+            <form onSubmit={handleSearch} className="relative hidden md:block">
+              <Input
+                type="search"
+                placeholder="Tìm kiếm phim..."
+                className={cn(
                     "w-[200px] lg:w-[300px] transition-all bg-transparent border-white/20 text-white placeholder:text-white/70"
-                  )}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <Button 
-                  type="submit" 
-                  size="icon" 
-                  variant="ghost" 
-                  className={cn(
+                )}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Button 
+                type="submit" 
+                size="icon" 
+                variant="ghost" 
+                className={cn(
                     "absolute right-0 top-0 h-full text-white hover:text-white hover:bg-white/10"
-                  )}
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-              </form>
+                )}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </form>
 
               {/* User Menu or Login/Register Button */}
               {user ? (
@@ -261,40 +261,40 @@ export function Header() {
                 </Button>
               )}
 
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className={cn(
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className={cn(
                   "md:hidden text-white hover:text-white hover:bg-white/10"
-                )}
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </Button>
-            </div>
+              )}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
           </div>
+        </div>
 
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t">
-              <form onSubmit={handleSearch} className="relative mb-4">
-                <Input
-                  type="search"
-                  placeholder="Tìm kiếm phim..."
-                  className="w-full"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <Button 
-                  type="submit" 
-                  size="icon" 
-                  variant="ghost" 
-                  className="absolute right-0 top-0 h-full"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-              </form>
-              <nav className="flex flex-col space-y-2">
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden py-4 border-t">
+            <form onSubmit={handleSearch} className="relative mb-4">
+              <Input
+                type="search"
+                placeholder="Tìm kiếm phim..."
+                className="w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Button 
+                type="submit" 
+                size="icon" 
+                variant="ghost" 
+                className="absolute right-0 top-0 h-full"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </form>
+            <nav className="flex flex-col space-y-2">
                 {/* Auth buttons for mobile */}
                 {user ? (
                   <div className="flex flex-col space-y-2 mb-2">
@@ -349,15 +349,15 @@ export function Header() {
                   </div>
                 )}
 
-                <Link to="/phim-le" className="px-2 py-2 hover:bg-accent rounded-md" onClick={() => setMobileMenuOpen(false)}>
-                  Phim Lẻ
-                </Link>
-                <Link to="/phim-bo" className="px-2 py-2 hover:bg-accent rounded-md" onClick={() => setMobileMenuOpen(false)}>
-                  Phim Bộ
-                </Link>
-                <div className="px-2 py-2">
-                  <h3 className="font-medium mb-2">Thể Loại</h3>
-                  <div className="grid grid-cols-2 gap-2 pl-2">
+              <Link to="/phim-le" className="px-2 py-2 hover:bg-accent rounded-md" onClick={() => setMobileMenuOpen(false)}>
+                Phim Lẻ
+              </Link>
+              <Link to="/phim-bo" className="px-2 py-2 hover:bg-accent rounded-md" onClick={() => setMobileMenuOpen(false)}>
+                Phim Bộ
+              </Link>
+              <div className="px-2 py-2">
+                <h3 className="font-medium mb-2">Thể Loại</h3>
+                <div className="grid grid-cols-2 gap-2 pl-2">
                     {genres.slice(0, 8).map(genre => (
                       <Link 
                         key={genre.slug}
@@ -368,11 +368,11 @@ export function Header() {
                         {genre.name}
                       </Link>
                     ))}
-                  </div>
                 </div>
-                <div className="px-2 py-2">
-                  <h3 className="font-medium mb-2">Quốc Gia</h3>
-                  <div className="grid grid-cols-2 gap-2 pl-2">
+              </div>
+              <div className="px-2 py-2">
+                <h3 className="font-medium mb-2">Quốc Gia</h3>
+                <div className="grid grid-cols-2 gap-2 pl-2">
                     {countries.slice(0, 6).map(country => (
                       <Link 
                         key={country.slug}
@@ -383,11 +383,11 @@ export function Header() {
                         {country.name}
                       </Link>
                     ))}
-                  </div>
                 </div>
-              </nav>
-            </div>
-          )}
+              </div>
+            </nav>
+          </div>
+        )}
         </div>
       </div>
     </header>

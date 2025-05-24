@@ -270,8 +270,8 @@ export default function SearchPage() {
               </Select>
             </div>
           </div>
-          
-          <Separator className="my-6" />
+
+      <Separator className="my-6" />
         </>
       )}
 
@@ -371,8 +371,8 @@ export default function SearchPage() {
             {/* Total results */}
             <div className="text-center text-sm text-muted-foreground">
               Trang {currentPage} / {totalPages} • Tổng {totalMovies} phim
-            </div>
           </div>
+        </div>
         </>
       ) : searchParams.get("q") ? (
         <div className="flex flex-col items-center justify-center h-64">

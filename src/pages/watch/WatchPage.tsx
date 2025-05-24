@@ -12,23 +12,38 @@ import { FavoriteButton } from "@/components/ui/favorite-button";
 import { ShareButton } from "@/components/ui/share-button";
 import CommentSection from "@/components/common/comment_section";
 
-// Native HLS Video Player using hls.js
+// Universal Video Player supporting both HLS and MP4
 const StableVideoPlayer = memo(({ episode }: { episode: MovieEpisode }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Extract video source from episode
-  const videoSrc = useMemo(() => {
+  // Extract video source from episode and determine format
+  const videoInfo = useMemo(() => {
+    // Check linkM3u8 first, but also verify it's actually M3U8
     if (episode.linkM3u8) {
-      return episode.linkM3u8;
+      // Check if linkM3u8 is actually an MP4 file
+      if (episode.linkM3u8.includes('.mp4') || episode.linkM3u8.includes('mp4')) {
+        return { src: episode.linkM3u8, type: 'mp4' };
+      } else if (episode.linkM3u8.includes('.m3u8') || episode.linkM3u8.includes('m3u8')) {
+        return { src: episode.linkM3u8, type: 'hls' };
+      } else {
+        // If linkM3u8 doesn't contain clear indicators, assume it's HLS
+        return { src: episode.linkM3u8, type: 'hls' };
+      }
     } else if (episode.linkEmbed) {
-      // If only embed is available, we can't use it with hls.js
-      setError("Không hỗ trợ định dạng video này");
-      return null;
+      // Check if linkEmbed is a direct MP4 URL
+      if (episode.linkEmbed.includes('.mp4') || episode.linkEmbed.includes('mp4')) {
+        return { src: episode.linkEmbed, type: 'mp4' };
+      } else if (episode.linkEmbed.includes('.m3u8') || episode.linkEmbed.includes('m3u8')) {
+        return { src: episode.linkEmbed, type: 'hls' };
+      } else {
+        // If it's an embed link, we can't use it
+        return { src: null, type: 'unsupported' };
+      }
     }
-    return null;
+    return { src: null, type: 'none' };
   }, [episode]);
 
   useEffect(() => {
@@ -43,65 +58,92 @@ const StableVideoPlayer = memo(({ episode }: { episode: MovieEpisode }) => {
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !videoSrc) return;
+    if (!video || !videoInfo.src) return;
 
     setIsLoading(true);
     setError(null);
 
     const loadVideo = async () => {
       try {
-        // Check if HLS is supported by native browser
-        if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          // Native HLS support (Safari)
-          video.src = videoSrc;
-          video.addEventListener('loadedmetadata', () => {
-            setIsLoading(false);
-          });
-        } else if (Hls.isSupported()) {
-          // Use HLS.js for browsers without native HLS support
-          const hls = new Hls({
-            enableWorker: true,
-            lowLatencyMode: true,
-            backBufferLength: 90
-          });
+        if (videoInfo.type === 'mp4') {
+          // Handle MP4 files with native HTML5 video
+          video.src = videoInfo.src;
           
-          hlsRef.current = hls;
-          
-          hls.attachMedia(video);
-          hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-            hls.loadSource(videoSrc);
-          });
-          
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          const handleLoadedMetadata = () => {
             setIsLoading(false);
             video.play().catch(error => {
               console.warn('Autoplay prevented:', error);
             });
-          });
+          };
           
-          hls.on(Hls.Events.ERROR, (_, data) => {
-            if (data.fatal) {
-              switch (data.type) {
-                case Hls.ErrorTypes.NETWORK_ERROR:
-                  // Try to recover network error
-                  console.log('Fatal network error', data);
-                  hls.startLoad();
-                  break;
-                case Hls.ErrorTypes.MEDIA_ERROR:
-                  // Try to recover media error
-                  console.log('Fatal media error', data);
-                  hls.recoverMediaError();
-                  break;
-                default:
-                  // Cannot recover
-                  setError('Không thể phát video');
-                  hls.destroy();
-                  break;
+          const handleError = () => {
+            setError('Không thể phát video MP4');
+            setIsLoading(false);
+          };
+          
+          video.addEventListener('loadedmetadata', handleLoadedMetadata);
+          video.addEventListener('error', handleError);
+          
+          // Cleanup event listeners
+          return () => {
+            video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+            video.removeEventListener('error', handleError);
+          };
+          
+        } else if (videoInfo.type === 'hls') {
+          // Handle HLS streams
+          if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Native HLS support (Safari)
+            video.src = videoInfo.src;
+            video.addEventListener('loadedmetadata', () => {
+              setIsLoading(false);
+            });
+          } else if (Hls.isSupported()) {
+            // Use HLS.js for browsers without native HLS support
+            const hls = new Hls({
+              enableWorker: true,
+              lowLatencyMode: true,
+              backBufferLength: 90
+            });
+            
+            hlsRef.current = hls;
+            
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+              hls.loadSource(videoInfo.src);
+            });
+            
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+              setIsLoading(false);
+              video.play().catch(error => {
+                console.warn('Autoplay prevented:', error);
+              });
+            });
+            
+            hls.on(Hls.Events.ERROR, (_, data) => {
+              if (data.fatal) {
+                switch (data.type) {
+                  case Hls.ErrorTypes.NETWORK_ERROR:
+                    // Try to recover network error
+                    console.log('Fatal network error', data);
+                    hls.startLoad();
+                    break;
+                  case Hls.ErrorTypes.MEDIA_ERROR:
+                    // Try to recover media error
+                    console.log('Fatal media error', data);
+                    hls.recoverMediaError();
+                    break;
+                  default:
+                    // Cannot recover
+                    setError('Không thể phát video');
+                    hls.destroy();
+                    break;
+                }
               }
-            }
-          });
-        } else {
-          setError('Trình duyệt không hỗ trợ phát video HLS');
+            });
+          } else {
+            setError('Trình duyệt không hỗ trợ phát video HLS');
+          }
         }
       } catch (err) {
         console.error('Video player error:', err);
@@ -111,14 +153,14 @@ const StableVideoPlayer = memo(({ episode }: { episode: MovieEpisode }) => {
     };
 
     loadVideo();
-  }, [videoSrc, episode.id]);
+  }, [videoInfo, episode.id]);
 
-  if (!videoSrc || error) {
+  if (!videoInfo.src || videoInfo.type === 'unsupported' || error) {
     return (
       <div className="absolute inset-0 flex items-center justify-center bg-black">
         <div className="text-center">
           <p className="text-xl font-medium text-white">
-            {error || "Không có nguồn phát"}
+            {error || "Không hỗ trợ định dạng video này"}
           </p>
           <p className="mt-2 text-sm text-white/70">
             {error 
