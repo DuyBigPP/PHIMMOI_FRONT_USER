@@ -122,51 +122,52 @@ export default function HomePage() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-8">
-      {/* Featured Carousel */}
-      <div className="-mx-4">
-        <FeaturedCarousel movies={featuredCarouselMovies} />
-      </div>
+    <>
+      {/* Featured Carousel - Full width, outside container */}
+      <FeaturedCarousel movies={featuredCarouselMovies} />
+      
+      {/* Main content with container */}
+      <div className="container mx-auto px-4 space-y-6 md:space-y-8 mt-6 md:mt-8">
+        {/* Trending Movies - Desktop */}
+        <div className="hidden md:block">
+          {trendingMovies.length > 0 && (
+            <Section title="Phim Lẻ" href="/phim-le">
+              <MovieCarousel movies={trendingMovies} className="w-full" />
+            </Section>
+          )}
+        </div>
 
-      {/* Trending Movies - Desktop */}
-      <div className="hidden md:block">
-        {trendingMovies.length > 0 && (
-          <Section title="Phim Lẻ" href="/phim-le">
-            <MovieCarousel movies={trendingMovies} className="w-full" />
-          </Section>
-        )}
-      </div>
+        {/* Trending Movies - Mobile */}
+        <div className="md:hidden">
+          {trendingMovies.length > 0 && (
+            <MovieSection 
+              title="Phim Lẻ" 
+              viewAllHref="/phim-le" 
+              movies={trendingMovies.slice(0, 6)} 
+            />
+          )}
+        </div>
 
-      {/* Trending Movies - Mobile */}
-      <div className="md:hidden">
-        {trendingMovies.length > 0 && (
-          <MovieSection 
-            title="Phim Lẻ" 
-            viewAllHref="/phim-le" 
-            movies={trendingMovies.slice(0, 6)} 
-          />
-        )}
-      </div>
+        {/* Popular TV Shows - Desktop */}
+        <div className="hidden md:block">
+          {popularTVShows.length > 0 && (
+            <Section title="Phim Bộ" href="/phim-bo">
+              <MovieCarousel movies={popularTVShows} className="w-full" />
+            </Section>
+          )}
+        </div>
 
-      {/* Popular TV Shows - Desktop */}
-      <div className="hidden md:block">
-        {popularTVShows.length > 0 && (
-          <Section title="Phim Bộ" href="/phim-bo">
-            <MovieCarousel movies={popularTVShows} className="w-full" />
-          </Section>
-        )}
+        {/* Popular TV Shows - Mobile */}
+        <div className="md:hidden">
+          {popularTVShows.length > 0 && (
+            <MovieSection 
+              title="Phim Bộ" 
+              viewAllHref="/phim-bo" 
+              movies={popularTVShows.slice(0, 6)} 
+            />
+          )}
+        </div>
       </div>
-
-      {/* Popular TV Shows - Mobile */}
-      <div className="md:hidden">
-        {popularTVShows.length > 0 && (
-          <MovieSection 
-            title="Phim Bộ" 
-            viewAllHref="/phim-bo" 
-            movies={popularTVShows.slice(0, 6)} 
-          />
-        )}
-      </div>
-    </div>
+    </>
   );
 }

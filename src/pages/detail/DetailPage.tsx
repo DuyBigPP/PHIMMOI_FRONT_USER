@@ -131,27 +131,46 @@ export default function DetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Hero Banner */}
+    <div className="min-h-screen">
+      {/* Hero Banner - Full width on all devices */}
       <MovieHeroBanner movie={movie} />
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {/* Left Column - Poster and Action Buttons */}
-        <MoviePoster movie={movie} />
-
-        {/* Right Column - Details */}
-        <MovieInfo movie={movie} />
-      </div>
-
-      {/* Episodes list for TV Shows */}
-      <EpisodeList movie={movie} />
       
-      {/* Comment Section */}
-      <CommentSection movieId={movie.id} className="mt-8" />
-      {/* Related Movies */}
-      <RelatedMovies movies={relatedMovies} />
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-6 space-y-8">
+        {/* Mobile Layout: Side by side but with proper proportions */}
+        <div className="block lg:hidden">
+          <div className="flex gap-4">
+            {/* Poster - Fixed width */}
+            <div className="flex-shrink-0 w-32">
+              <MoviePoster movie={movie} className="mobile-poster" />
+            </div>
+            
+            {/* Movie Info - Takes remaining space */}
+            <div className="flex-1 min-w-0">
+              <MovieInfo movie={movie} className="mobile-info" />
+            </div>
+          </div>
+        </div>
 
+        {/* Desktop Layout: Grid */}
+        <div className="hidden lg:grid lg:grid-cols-4 lg:gap-8">
+          <div className="lg:col-span-1">
+            <MoviePoster movie={movie} />
+          </div>
+          <div className="lg:col-span-3">
+            <MovieInfo movie={movie} />
+          </div>
+        </div>
+
+        {/* Episodes list for TV Shows */}
+        <EpisodeList movie={movie} />
+        
+        {/* Comment Section */}
+        <CommentSection movieId={movie.id} />
+        
+        {/* Related Movies */}
+        <RelatedMovies movies={relatedMovies} />
+      </div>
     </div>
   );
 } 

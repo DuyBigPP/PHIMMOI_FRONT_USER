@@ -127,7 +127,6 @@ export function Header() {
       )}
     >
       <div className="container mx-auto px-4">
-        <div className="w-full px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/home-page" className="flex items-center space-x-2">
@@ -274,33 +273,41 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Overlay */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            <form onSubmit={handleSearch} className="relative mb-4">
-              <Input
-                type="search"
-                placeholder="Tìm kiếm phim..."
-                className="w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <Button 
-                type="submit" 
-                size="icon" 
-                variant="ghost" 
-                className="absolute right-0 top-0 h-full"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </form>
-            <nav className="flex flex-col space-y-2">
+          <>
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 z-40 bg-black/50 md:hidden" 
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            {/* Mobile Menu */}
+            <div className="fixed top-16 left-0 right-0 z-50 md:hidden bg-black/95 backdrop-blur-sm border-t border-white/20 max-h-[calc(100vh-4rem)] overflow-y-auto">
+              <div className="container mx-auto px-4 py-4">
+              <form onSubmit={handleSearch} className="relative mb-4">
+                <Input
+                  type="search"
+                  placeholder="Tìm kiếm phim..."
+                  className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/70"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <Button 
+                  type="submit" 
+                  size="icon" 
+                  variant="ghost" 
+                  className="absolute right-0 top-0 h-full text-white hover:text-white hover:bg-white/10"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </form>
+              <nav className="flex flex-col space-y-2">
                 {/* Auth buttons for mobile */}
                 {user ? (
                   <div className="flex flex-col space-y-2 mb-2">
                     <Link 
                       to="/user-profile" 
-                      className="flex items-center px-2 py-2 hover:bg-accent rounded-md"
+                      className="flex items-center px-2 py-2 hover:bg-white/10 rounded-md text-white"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Avatar className="h-6 w-6 mr-2">
@@ -313,7 +320,7 @@ export function Header() {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="justify-start"
+                      className="justify-start border-white/20 text-white hover:bg-white/10"
                       onClick={() => {
                         handleLogout();
                         setMobileMenuOpen(false);
@@ -327,7 +334,7 @@ export function Header() {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="flex-1"
+                      className="flex-1 border-white/20 text-white hover:bg-white/10"
                       onClick={() => {
                         navigate("/dang-nhap");
                         setMobileMenuOpen(false);
@@ -349,46 +356,47 @@ export function Header() {
                   </div>
                 )}
 
-              <Link to="/phim-le" className="px-2 py-2 hover:bg-accent rounded-md" onClick={() => setMobileMenuOpen(false)}>
-                Phim Lẻ
-              </Link>
-              <Link to="/phim-bo" className="px-2 py-2 hover:bg-accent rounded-md" onClick={() => setMobileMenuOpen(false)}>
-                Phim Bộ
-              </Link>
-              <div className="px-2 py-2">
-                <h3 className="font-medium mb-2">Thể Loại</h3>
-                <div className="grid grid-cols-2 gap-2 pl-2">
-                    {genres.slice(0, 8).map(genre => (
-                      <Link 
-                        key={genre.slug}
-                        to={`/the-loai/${genre.slug}`} 
-                        className="py-1 hover:text-primary" 
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {genre.name}
-                      </Link>
-                    ))}
+                <Link to="/phim-le" className="px-2 py-2 hover:bg-white/10 rounded-md text-white" onClick={() => setMobileMenuOpen(false)}>
+                  Phim Lẻ
+                </Link>
+                <Link to="/phim-bo" className="px-2 py-2 hover:bg-white/10 rounded-md text-white" onClick={() => setMobileMenuOpen(false)}>
+                  Phim Bộ
+                </Link>
+                <div className="px-2 py-2">
+                  <h3 className="font-medium mb-2 text-white">Thể Loại</h3>
+                  <div className="grid grid-cols-2 gap-2 pl-2">
+                      {genres.slice(0, 8).map(genre => (
+                        <Link 
+                          key={genre.slug}
+                          to={`/the-loai/${genre.slug}`} 
+                          className="py-1 hover:text-primary text-white/80" 
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {genre.name}
+                        </Link>
+                      ))}
+                  </div>
                 </div>
-              </div>
-              <div className="px-2 py-2">
-                <h3 className="font-medium mb-2">Quốc Gia</h3>
-                <div className="grid grid-cols-2 gap-2 pl-2">
-                    {countries.slice(0, 6).map(country => (
-                      <Link 
-                        key={country.slug}
-                        to={`/quoc-gia/${country.slug}`} 
-                        className="py-1 hover:text-primary" 
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {country.name}
-                      </Link>
-                    ))}
+                <div className="px-2 py-2">
+                  <h3 className="font-medium mb-2 text-white">Quốc Gia</h3>
+                  <div className="grid grid-cols-2 gap-2 pl-2">
+                      {countries.slice(0, 6).map(country => (
+                        <Link 
+                          key={country.slug}
+                          to={`/quoc-gia/${country.slug}`} 
+                          className="py-1 hover:text-primary text-white/80" 
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {country.name}
+                        </Link>
+                      ))}
+                  </div>
                 </div>
+              </nav>
               </div>
-            </nav>
-          </div>
+            </div>
+          </>
         )}
-        </div>
       </div>
     </header>
   );

@@ -15,18 +15,18 @@ export function EpisodeList({ movie }: EpisodeListProps) {
   
   return (
     <>
-      <Separator className="my-4" />
+      <Separator className="my-6" />
       
       <div>
-        <h2 className="mb-3 text-xl font-semibold">Danh sách tập</h2>
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+        <h2 className="mb-4 text-xl font-semibold">Danh sách tập</h2>
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
           {movie.episodes.map((episode) => (
             <Link 
               key={episode.id}
               to={`/xem-phim/${movie.slug}/${episode.slug}`}
-              className="flex flex-col items-center rounded-md border p-1 transition-colors hover:bg-accent"
+              className="flex items-center justify-center rounded-md border p-2 text-center transition-colors hover:bg-accent min-h-[40px]"
             >
-              <span className="text-sm font-medium">{episode.name}</span>
+              <span className="text-sm font-medium truncate">{episode.name}</span>
             </Link>
           ))}
         </div>
