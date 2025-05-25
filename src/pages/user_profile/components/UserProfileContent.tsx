@@ -327,25 +327,25 @@ export function UserProfileContent() {
   console.log('Join date to format:', joinDate);
   
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-4 px-4 sm:py-8">
       {errorMessage && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-800 border border-red-500 text-white px-4 py-2 rounded-md text-sm z-50 animate-in fade-in duration-300">
           {errorMessage}
         </div>
       )}
       
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-4">
         {/* User Info Card */}
         <div className="md:col-span-1">
           <Card>
-            <CardHeader className="flex flex-col items-center">
-              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                <User className="h-12 w-12 text-primary" />
+            <CardHeader className="flex flex-col items-center pb-4">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                <User className="h-10 w-10 sm:h-12 sm:w-12 text-primary" />
               </div>
-              <CardTitle className="text-xl">{displayUser.name}</CardTitle>
-              <p className="text-sm text-muted-foreground">{displayUser.email}</p>
+              <CardTitle className="text-lg sm:text-xl text-center">{displayUser.name}</CardTitle>
+              <p className="text-sm text-muted-foreground text-center">{displayUser.email}</p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="space-y-2">
                 <p className="text-sm">
                   <span className="font-medium">Ngày tham gia:</span>{" "}
@@ -367,12 +367,16 @@ export function UserProfileContent() {
         {/* Main Content */}
         <div className="md:col-span-3">
           <Tabs defaultValue="favorites">
-            <TabsList className="mb-4">
-              <TabsTrigger value="favorites">
+            <TabsList className="mb-4 w-full sm:w-auto">
+              <TabsTrigger value="favorites" className="flex-1 sm:flex-none">
                 <Heart className="h-4 w-4 mr-2" />
-                Phim yêu thích
+                <span className="hidden sm:inline">Phim yêu thích</span>
+                <span className="sm:hidden">Yêu thích</span>
               </TabsTrigger>
-              <TabsTrigger value="settings">Cài đặt tài khoản</TabsTrigger>
+              <TabsTrigger value="settings" className="flex-1 sm:flex-none">
+                <span className="hidden sm:inline">Cài đặt tài khoản</span>
+                <span className="sm:hidden">Cài đặt</span>
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="favorites">
@@ -382,17 +386,17 @@ export function UserProfileContent() {
                 </div>
               ) : favoriteMovies.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
                     {currentMovies.map((movie) => (
                       <div key={movie.id} className="group relative">
                         <MovieCard movie={movie} />
                         <Button
                           variant="destructive"
                           size="icon"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 sm:w-8 sm:h-8"
                           onClick={() => handleRemoveFavorite(movie.id)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                           <span className="sr-only">Xóa khỏi yêu thích</span>
                         </Button>
                       </div>
