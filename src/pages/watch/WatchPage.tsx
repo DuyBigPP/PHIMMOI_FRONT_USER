@@ -63,7 +63,12 @@ export default function WatchPage() {
     );
   }
 
-  const isTVShow = movie.type === 'series';
+  const isTVShow = movie.type === 'series' || 
+                   movie.type === 'tv' || 
+                   movie.type === 'hoathinh' ||
+                   movie.type === 'tvshows' ||
+                   movie.type === 'phim-bo' ||
+                   (movie.episodes && movie.episodes.length > 0);
 
   return (
     <div className="space-y-6">

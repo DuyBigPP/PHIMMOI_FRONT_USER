@@ -12,7 +12,12 @@ interface MovieTitleProps {
 }
 
 const MovieTitle = ({ movie, currentEpisode }: MovieTitleProps) => {
-  const isTVShow = movie.type === 'series';
+  const isTVShow = movie.type === 'series' || 
+                   movie.type === 'tv' || 
+                   movie.type === 'hoathinh' ||
+                   movie.type === 'tvshows' ||
+                   movie.type === 'phim-bo' ||
+                   (movie.episodes && movie.episodes.length > 0);
   const episodeTitle = isTVShow ? `${movie.name} - ${currentEpisode.name}` : movie.name;
 
   return (

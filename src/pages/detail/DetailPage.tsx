@@ -31,10 +31,20 @@ export default function DetailPage() {
         try {
           // Lấy chi tiết phim
           const movieResponse = await getMovieBySlug(slug);
-          if (movieResponse.success && movieResponse.data) {
-            // Chuyển đổi kiểu dữ liệu từ API response sang MovieDetail
+          if (movieResponse.success && movieResponse.data) {            // Chuyển đổi kiểu dữ liệu từ API response sang MovieDetail
             const movieData = movieResponse.data as unknown as MovieDetail;
             setMovie(movieData);
+            
+            // Debug logging for episodes
+            console.log('Movie Detail Debug:', {
+              name: movieData.name,
+              type: movieData.type,
+              hasEpisodes: !!movieData.episodes,
+              episodeCount: movieData.episodes?.length || 0,
+              episodeCurrent: movieData.episodeCurrent,
+              episodeTotal: movieData.episodeTotal,
+              fullMovieData: movieData
+            });
             
             // Tạo view khi xem phim
             if (movieData.id) {
