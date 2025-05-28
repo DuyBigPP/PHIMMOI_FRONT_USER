@@ -182,7 +182,9 @@ export const addFavorite = async (movieId: string): Promise<ApiResponse<Favorite
 };
 
 export const deleteFavorite = async (movieId: string): Promise<ApiResponse<void>> => {
-  const response = await axios.delete(DELETE_FAVORITE.replace('{movieId}', movieId));
+  const response = await axios.delete(DELETE_FAVORITE, {
+    data: { movieId }
+  });
   return response.data;
 };
 

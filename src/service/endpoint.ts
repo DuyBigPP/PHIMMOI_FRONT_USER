@@ -25,9 +25,9 @@ export const ADD_FAVORITE = `${BASE_URL}/api/favorites`; // POST
 /* parameters for add favorite:
     - movieId: string (body)
 */
-export const DELETE_FAVORITE = `${BASE_URL}/api/favorites/{favoriteId}`; // DELETE
+export const DELETE_FAVORITE = `${BASE_URL}/api/favorites`; // DELETE
 /* parameters for delete favorite:
-    - movieId: string (path)
+    - movieId: string (body)
 */
 
 
