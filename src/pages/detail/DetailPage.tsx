@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getMovieBySlug, getRelatedMovies, createView } from "@/service/function";
 import type { Movie, MovieDetail } from "@/types/movie";
@@ -18,20 +18,25 @@ export default function DetailPage() {
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [relatedMovies, setRelatedMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const dataFetchedRef = useRef(false);
-
-  useEffect(() => {
-    // Tránh fetch dữ liệu nhiều lần trong development mode với React.StrictMode
-    if (dataFetchedRef.current) return;
+  const [error, setError] = useState<string | null>(null);  useEffect(() => {
+    console.log('DetailPage useEffect triggered with slug:', slug);
     
     const fetchMovieData = async () => {
       if (slug) {
+        console.log('Starting to fetch movie data for slug:', slug);
         setLoading(true);
+        setError(null); // Reset error state
+        setMovie(null); // Reset movie state to trigger re-render
+        setRelatedMovies([]); // Reset related movies
+        
+        // Scroll to top when navigating to new movie
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
         try {
           // Lấy chi tiết phim
           const movieResponse = await getMovieBySlug(slug);
-          if (movieResponse.success && movieResponse.data) {            // Chuyển đổi kiểu dữ liệu từ API response sang MovieDetail
+          if (movieResponse.success && movieResponse.data) {
+            // Chuyển đổi kiểu dữ liệu từ API response sang MovieDetail
             const movieData = movieResponse.data as unknown as MovieDetail;
             setMovie(movieData);
             
@@ -90,8 +95,6 @@ export default function DetailPage() {
                 // Không hiển thị lỗi cho người dùng khi không tải được phim liên quan
               }
             }
-            
-            dataFetchedRef.current = true;
           } else {
             throw new Error(movieResponse.message || "Không thể tải dữ liệu phim");
           }
