@@ -8,6 +8,7 @@ interface VideoPlayerProps {
 
 const VideoPlayer = memo(({ episode }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,8 +48,108 @@ const VideoPlayer = memo(({ episode }: VideoPlayerProps) => {
         hlsRef.current = null;
       }
     };
-  }, [episode.id]);
+  }, [episode.id]);  // Keyboard shortcuts with improved event handling
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const video = videoRef.current;
+      const container = containerRef.current;
+      
+      if (!video || !container) return;
 
+      // Check if we should handle this event
+      const isVideoPlayerActive = container.contains(document.activeElement) || 
+                                 document.activeElement === container ||
+                                 document.activeElement === video ||
+                                 document.activeElement === document.body;
+
+      // List of keys we want to handle
+      const controlKeys = [
+        'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 
+        ' ', 'k', 'm', 'f',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+      ];
+      
+      // For arrow keys, always handle them when video is playing/visible
+      const isArrowKey = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key);
+      
+      if (!controlKeys.includes(e.key)) return;
+      if (!isVideoPlayerActive && !isArrowKey) return;
+
+      // Prevent default browser behavior ALWAYS for these keys
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      console.log('Video Player: Handling key:', e.key);      switch (e.key) {
+        case 'ArrowLeft': {
+          // Seek backward 10 seconds
+          const newTimeBackward = Math.max(0, video.currentTime - 10);
+          video.currentTime = newTimeBackward;
+          console.log('Seeking backward 10s, new time:', newTimeBackward);
+          break;
+        }
+        case 'ArrowRight': {
+          // Seek forward 10 seconds
+          const newTimeForward = Math.min(video.duration || 0, video.currentTime + 10);
+          video.currentTime = newTimeForward;
+          console.log('Seeking forward 10s, new time:', newTimeForward);
+          break;
+        }
+        case 'ArrowUp':
+          // Increase volume by 10%
+          video.volume = Math.min(1, video.volume + 0.1);
+          break;
+        case 'ArrowDown':
+          // Decrease volume by 10%
+          video.volume = Math.max(0, video.volume - 0.1);
+          break;
+        case ' ':
+        case 'k':
+          // Toggle play/pause
+          if (video.paused) {
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+          break;
+        case 'm':
+          // Toggle mute
+          video.muted = !video.muted;
+          break;
+        case 'f':
+          // Toggle fullscreen
+          if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => {});
+          } else {
+            container.requestFullscreen().catch(() => {});
+          }
+          break;
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9': {
+          // Jump to percentage of video
+          const percentage = parseInt(e.key) * 10;
+          const duration = video.duration || 0;
+          video.currentTime = (duration * percentage) / 100;
+          break;
+        }
+      }
+    };
+
+    // Use capture phase to intercept BEFORE any other handlers
+    document.addEventListener('keydown', handleKeyDown, { capture: true, passive: false });
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, { capture: true });
+    };
+  }, []);
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !videoInfo.src) return;
@@ -143,9 +244,7 @@ const VideoPlayer = memo(({ episode }: VideoPlayerProps) => {
         setError('Có lỗi khi phát video');
         setIsLoading(false);
       }
-    };
-
-    loadVideo();
+    };    loadVideo();
   }, [videoInfo, episode.id]);
 
   if (!videoInfo.src || videoInfo.type === 'unsupported' || error) {
@@ -166,18 +265,24 @@ const VideoPlayer = memo(({ episode }: VideoPlayerProps) => {
   }
   
   return (
-    <div className="relative w-full h-full">
+    <div 
+      ref={containerRef}
+      className="relative w-full h-full"
+      tabIndex={0}
+      style={{ outline: 'none' }}
+    >
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
           <div className="w-12 h-12 border-4 border-t-primary rounded-full animate-spin" />
         </div>
-      )}
-      <video
+      )}      <video
         ref={videoRef}
+        className="w-full h-full object-contain bg-black"
         controls
         autoPlay
         playsInline
-        className="absolute inset-0 w-full h-full object-contain bg-black"
+        tabIndex={-1}
+        style={{ outline: 'none' }}
       />
     </div>
   );
@@ -185,4 +290,4 @@ const VideoPlayer = memo(({ episode }: VideoPlayerProps) => {
 
 VideoPlayer.displayName = "VideoPlayer";
 
-export default VideoPlayer; 
+export default VideoPlayer;
