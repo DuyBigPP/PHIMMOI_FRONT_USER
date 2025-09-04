@@ -1,4 +1,4 @@
-const BASE_URL = "https://phimmoibackend-production.up.railway.app";
+const BASE_URL = "https://phimmoi-backend.onrender.com";
 
 /* COMMENT */
 export const CREATE_COMMENT = `${BASE_URL}/api/movies/{movieId}/comments`; // POST
